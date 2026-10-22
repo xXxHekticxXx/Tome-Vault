@@ -1,0 +1,7 @@
+node_modules/
+app/www/
+server/library/
+server/config.json
+*.part
+__pycache__/
+.DS_Store

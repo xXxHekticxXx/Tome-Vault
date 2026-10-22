@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10131a">
+<title>Tome Vault</title>
+<link rel="icon" href="icon.png">
+<style>
+@font-face{font-family:"Cinzel";font-weight:500;font-display:swap;src:url(vendor/fonts/cinzel-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Cinzel";font-weight:600;font-display:swap;src:url(vendor/fonts/cinzel-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Alegreya Sans";font-weight:400;font-display:swap;src:url(vendor/fonts/alegreya-sans-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Alegreya Sans";font-weight:500;font-display:swap;src:url(vendor/fonts/alegreya-sans-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Alegreya Sans";font-weight:700;font-display:swap;src:url(vendor/fonts/alegreya-sans-latin-700-normal.woff2) format("woff2")}
+:root{
+  --bg:#e8eaee; --surface:#f6f7f9; --raised:#ffffff; --ink:#1b1f2a; --muted:#5a6172; --line:#cdd1d9;
+  --accent:#8a1c2b; --accent-ink:#ffffff; --gold:#8c6d22; --mark:rgba(214,170,60,.42); --danger:#a3242f; --ok:#2f6b3c;
+  --shadow:0 1px 2px rgba(20,24,34,.12),0 6px 18px rgba(20,24,34,.10); --scrim:rgba(10,12,18,.5);
+  --display:"Cinzel",Georgia,"Times New Roman",serif;
+  --body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#10131a; --surface:#181c26; --raised:#1f2430; --ink:#e7e4dc; --muted:#9ba1ae; --line:#2d3341;
+  --accent:#d45c70; --accent-ink:#1a0d10; --gold:#d6b768; --mark:rgba(214,183,104,.40); --danger:#e2707b; --ok:#7cc48c;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 22px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.6); color-scheme:dark;}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.top{display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.brand svg{flex:none;color:var(--accent)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(22px,4vw,32px);letter-spacing:.04em;margin:0;line-height:1.1}
+.sub{color:var(--muted);font-size:14px;margin:2px 0 0;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub.offline{color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--raised);border-radius:8px;padding:8px 14px;min-height:42px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.icon{padding:8px;min-width:42px}
+.btn.wide{width:100%}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--gold);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:15px}
+.banner span{flex:1;min-width:160px}
+.search{display:flex;gap:8px;margin:16px 0 8px;flex-wrap:wrap}
+.search .field{flex:1 1 260px;display:flex;align-items:center;gap:8px;background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:0 12px;min-height:48px}
+.search .field:focus-within{border-color:var(--gold)}
+.search input{flex:1;min-width:0;border:0;background:transparent;font-size:18px;padding:10px 0;outline:none}
+.search select{flex:0 1 220px;min-width:0;border:1px solid var(--line);background:var(--raised);border-radius:10px;padding:0 10px;min-height:48px}
+.muted{color:var(--muted)}
+.jobs{display:grid;gap:8px;margin:12px 0}
+.job{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:15px}
+.job .name{font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 40%}
+.job .st{flex:1;min-width:0;color:var(--muted)}
+.job.err .st{color:var(--danger)}
+.job.ok .st{color:var(--gold)}
+.spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp .9s linear infinite;flex:none;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.label{font-family:var(--display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:24px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:22px 18px}
+@media (max-width:480px){.grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:18px 12px}}
+.tile{position:relative;min-width:0}
+.cover{display:block;width:100%;aspect-ratio:3/4;max-width:100%;border:0;padding:0;border-radius:4px 8px 8px 4px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);position:relative;transition:transform .15s}
+.cover:active{transform:scale(.97)}
+@media (hover:hover){.cover:hover{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.cover{transition:none}.cover:hover,.cover:active{transform:none}}
+.cover img{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+.cover::after{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:linear-gradient(90deg,rgba(0,0,0,.22),transparent)}
+.cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--display);font-size:14px;color:var(--muted)}
+.tname{font-size:15px;font-weight:500;line-height:1.25;margin:8px 0 0;overflow-wrap:anywhere}
+.tmeta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.tmeta .local{color:var(--ok)}
+.tmeta .dl{color:var(--gold)}
+.badge{position:absolute;left:6px;top:6px;background:var(--gold);color:#1b1408;font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:20px;text-transform:uppercase}
+.more{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(10,12,18,.62);color:#fff;display:flex;align-items:center;justify-content:center}
+.menu{position:absolute;top:44px;right:6px;z-index:5;background:var(--raised);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:4px;display:grid;min-width:150px}
+.menu button{background:none;border:0;text-align:left;padding:10px;border-radius:6px}
+.menu button:hover{background:var(--surface)}
+.menu .warn{color:var(--danger)}
+.menu p{margin:6px 10px;font-size:14px}
+.rename{width:100%;margin-top:8px;border:1px solid var(--gold);background:var(--raised);border-radius:6px;padding:6px 8px;font-size:15px}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;aspect-ratio:3/4;max-width:100%;border:1.5px dashed var(--line);border-radius:8px;background:transparent;color:var(--muted);font-size:14px;text-align:center;padding:8px}
+.drop:hover{border-color:var(--gold);color:var(--ink)}
+.empty{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px 20px;text-align:center;max-width:560px;margin:24px auto}
+.empty h2{font-family:var(--display);font-weight:500;font-size:22px;margin:0 0 6px}
+.empty p{margin:0 0 16px;color:var(--muted)}
+.results{display:grid;gap:22px}
+.rgroup h3{display:flex;align-items:center;gap:10px;margin:0 0 6px;font-size:17px;font-weight:700}
+.rgroup h3 img{width:30px;height:40px;object-fit:cover;border-radius:3px;flex:none;background:var(--surface)}
+.hit{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:8px}
+.hit:hover{border-color:var(--gold)}
+.hit .pg{font-family:var(--display);font-size:13px;letter-spacing:.08em;color:var(--gold);font-variant-numeric:tabular-nums}
+.hit .sn{display:block;margin-top:2px;color:var(--muted);font-size:15px;overflow-wrap:anywhere}
+mark{background:var(--mark);color:var(--ink);border-radius:2px;padding:0 1px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--muted);font-size:15px;margin-top:12px}
+/* connect screen */
+.connect{min-height:100vh;display:flex;align-items:center;justify-content:center;padding-block:24px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.connect form{width:100%;max-width:380px;display:grid;gap:12px;text-align:center}
+.connect svg{margin:0 auto;color:var(--accent)}
+.connect h1{font-size:30px}
+.connect p{margin:0;color:var(--muted)}
+.connect label{text-align:left;font-size:14px;color:var(--muted);display:grid;gap:4px}
+.connect input,.sheet input[type=url],.sheet input[type=password],.sheet input[type=text]{width:100%;border:1px solid var(--line);background:var(--raised);border-radius:8px;padding:11px 12px;font-size:16px}
+.err{color:var(--danger);font-size:14px;text-align:left}
+/* settings sheet */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:700px){.scrim{align-items:center}}
+.sheet{background:var(--bg);width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px max(18px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px))}
+@media (min-width:700px){.sheet{border-radius:16px}}
+.sheet h2{font-family:var(--display);font-weight:600;font-size:20px;margin:0}
+.shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sec{border-top:1px solid var(--line);padding:14px 0;display:grid;gap:8px}
+.sec h3{margin:0;font-size:13px;font-family:var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.sec p{margin:0;font-size:15px;color:var(--muted);overflow-wrap:anywhere}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row > *{flex:1 1 auto}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:16px}
+.switch input{width:46px;height:26px;accent-color:var(--accent)}
+.small{font-size:13px!important}
+/* reader */
+.reader{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column}
+.rbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--line);padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.rtitle{flex:1 1 140px;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pnum{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-size:15px}
+.pnum input{width:60px;text-align:center;border:1px solid var(--line);background:var(--raised);border-radius:6px;padding:6px}
+.rfind{display:flex;align-items:center;gap:6px;flex:1 1 260px;min-width:0}
+.rfind input{flex:1;min-width:0;border:1px solid var(--line);background:var(--raised);border-radius:8px;padding:8px 10px}
+.rfind span{font-size:14px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stage{flex:1;overflow:auto;padding:16px max(10px,env(safe-area-inset-left,0px)) calc(84px + env(safe-area-inset-bottom,0px))}
+.pagebox{position:relative;margin:0 auto;box-shadow:var(--shadow);background:#fff}
+.pagebox canvas{display:block}
+.hl{position:absolute;background:var(--mark);mix-blend-mode:multiply;border-radius:2px;pointer-events:none}
+.rmsg{text-align:center;color:var(--muted);padding:40px 16px;background:var(--bg)}
+.navside{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;right:max(16px,calc(env(safe-area-inset-right,0px) + 16px));z-index:21}
+.navside .btn{box-shadow:var(--shadow);min-width:52px;min-height:52px;border-radius:26px}
+</style>
+</head>
+<body>
+
+<!-- connect screen -->
+<div class="connect" id="connectView" hidden>
+  <form id="connectForm" novalidate>
+    <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 20.5 7.3v9.4L12 21.5 3.5 16.7V7.3Z"/><path d="M12 2.5 7.7 15.2h8.6Z"/><path d="M3.5 7.3 7.7 15.2 3.5 16.7M20.5 7.3l-4.2 7.9 4.2 1.5M7.7 15.2 12 21.5l4.3-6.3"/></svg>
+    <h1>Tome Vault</h1>
+    <p id="connectMsg">Connect to your party's vault.</p>
+    <label id="addrWrap" for="cAddr">Vault address
+      <input id="cAddr" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://vault.your-name.ts.net">
+    </label>
+    <label id="partyWrap" for="cParty">Party password
+      <input id="cParty" type="password" autocomplete="current-password" placeholder="Ask your DM">
+    </label>
+    <div class="err" id="cErr" role="alert" hidden></div>
+    <button class="btn primary wide" type="submit" id="cGo">Connect</button>
+    <button class="btn ghost wide" type="button" id="cSkip" hidden>Just use the built-in rules for now</button>
+  </form>
+</div>
+
+<!-- library -->
+<div class="wrap" id="mainView" hidden>
+  <header class="top">
+    <div class="brand">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 20.5 7.3v9.4L12 21.5 3.5 16.7V7.3Z"/><path d="M12 2.5 7.7 15.2h8.6Z"/><path d="M3.5 7.3 7.7 15.2 3.5 16.7M20.5 7.3l-4.2 7.9 4.2 1.5M7.7 15.2 12 21.5l4.3-6.3"/></svg>
+      <div style="min-width:0"><h1>Tome Vault</h1><p class="sub" id="sub">Opening the vault…</p></div>
+    </div>
+    <button class="btn icon" id="syncBtn" aria-label="Check for new books" title="Check for new books"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.6-4.5M4 4v3h3"/><path d="M4 13a8 8 0 0 0 14.6 4.5M20 20v-3h-3"/></svg></button>
+    <button class="btn icon" id="setBtn" aria-label="Settings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
+    <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+  </header>
+
+  <div class="banner" id="updateBanner" hidden><span id="updateText"></span><a class="btn primary" id="updateLink" href="#" target="_blank" rel="noopener">Get the update</a></div>
+
+  <div class="search" role="search">
+    <label class="field" for="q">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--muted);flex:none"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search every book: fireball, owlbear, grapple" autocomplete="off" aria-label="Search all books">
+    </label>
+    <select id="bookFilter" aria-label="Which books to search"><option value="">All books</option></select>
+  </div>
+
+  <div class="jobs" id="jobs"></div>
+  <section id="libView">
+    <div class="label" id="libLabel" hidden>The shelf</div>
+    <div class="grid" id="grid"></div>
+    <div id="emptyBox"></div>
+  </section>
+  <section id="resView" hidden>
+    <div class="label" id="resLabel">Results</div>
+    <div class="results" id="results"></div>
+  </section>
+</div>
+
+<!-- settings -->
+<div class="scrim" id="settings" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="shead"><h2 id="setTitle">Settings</h2><button class="btn icon" id="setClose" aria-label="Close settings">✕</button></div>
+    <div class="sec" id="secVault">
+      <h3>Vault</h3>
+      <p id="vaultLine"></p>
+      <div class="row"><button class="btn" type="button" id="changeVault">Change vault</button></div>
+    </div>
+    <div class="sec" id="secOffline">
+      <h3>On this phone</h3>
+      <label class="switch" for="offlineToggle">Keep books on this phone for offline reading <input type="checkbox" id="offlineToggle"></label>
+      <p id="offlineLine" class="small"></p>
+      <div class="row"><button class="btn" type="button" id="clearLocal">Remove downloaded books</button></div>
+    </div>
+    <div class="sec" id="secKeeper">
+      <h3>Keeper tools</h3>
+      <p id="keeperLine">Enter the keeper password to add, rename, or remove books.</p>
+      <form class="row" id="keeperForm" novalidate>
+        <input id="kPw" type="password" placeholder="Keeper password" autocomplete="current-password" aria-label="Keeper password">
+        <button class="btn primary" type="submit">Unlock</button>
+      </form>
+      <div class="err" id="kErr" hidden></div>
+      <div class="row"><button class="btn" type="button" id="kLock" hidden>Lock keeper tools</button></div>
+    </div>
+    <div class="sec" id="secApp">
+      <h3>App</h3>
+      <p id="appLine"></p>
+      <div class="row"><button class="btn" type="button" id="checkApp">Check for app updates</button></div>
+    </div>
+    <div class="sec" id="secLegal">
+      <h3>Credits</h3>
+      <p class="small" id="srdCredit" hidden>This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.</p>
+      <p class="small">PDF rendering by PDF.js (Apache 2.0). Fonts: Cinzel and Alegreya Sans (SIL Open Font License).</p>
+    </div>
+  </div>
+</div>
+
+<!-- reader -->
+<div class="reader" id="reader" hidden>
+  <div class="rbar">
+    <button class="btn icon" id="rBack" aria-label="Back to the shelf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"/></svg></button>
+    <div class="rtitle" id="rTitle"></div>
+    <div class="pnum"><label for="rPage" class="muted">p.</label><input id="rPage" inputmode="numeric" aria-label="Page number"><span id="rTotal" class="muted"></span></div>
+    <button class="btn icon" id="zOut" aria-label="Zoom out">−</button>
+    <button class="btn icon" id="zIn" aria-label="Zoom in">+</button>
+    <div class="rfind">
+      <input id="rFind" type="search" placeholder="Find in this book" aria-label="Find in this book" autocomplete="off">
+      <span id="rFindInfo"></span>
+      <button class="btn icon" id="fPrev" aria-label="Previous match">↑</button>
+      <button class="btn icon" id="fNext" aria-label="Next match">↓</button>
+    </div>
+  </div>
+  <div class="stage" id="stage"><div class="pagebox" id="pagebox"></div></div>
+  <div class="navside">
+    <button class="btn icon" id="pPrev" aria-label="Previous page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"/></svg></button>
+    <button class="btn icon" id="pNext" aria-label="Next page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+  </div>
+</div>
+
+<script src="vendor/pdf.min.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
+
+/* ---------- platform ---------- */
+const CAP = window.Capacitor;
+const isApp = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
+const plug = n => !isApp ? null : (CAP.Plugins && CAP.Plugins[n]) || (CAP.registerPlugin ? CAP.registerPlugin(n) : null);
+const FS = plug("Filesystem"), APP = plug("App");
+
+/* ---------- storage helpers ---------- */
+const ls = {
+  get(k,d){ try{ const v=localStorage.getItem("tv."+k); return v===null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ v===undefined||v===null?localStorage.removeItem("tv."+k):localStorage.setItem("tv."+k,JSON.stringify(v)); }catch(e){} }
+};
+let cfg={}, base="", party=ls.get("party",""), keeperPw=ls.get("keeper","");
+let builtin=[], remote=[], books=[], online=false, offlineOnly=ls.get("offlineOnly",false);
+let localIdx=ls.get("local",{}), dataUri="";
+const offlineOn=()=>isApp && ls.get("offline",true);
+const textCache=new Map(), docCache=new Map();
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtBytes = b => b>=1073741824?(b/1073741824).toFixed(2)+" GB":b>=1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
+const keeper = () => !!keeperPw && online;
+
+/* ---------- where each file comes from ---------- */
+function isLocal(b){ const l=localIdx[b.id]; return !!(l && l.updatedAt===b.updatedAt); }
+function urlFor(b,name){
+  if(b.builtin) return "srd/"+name;
+  const l=localIdx[b.id];
+  if(isApp && l && dataUri && (l.updatedAt===b.updatedAt || !online)) return CAP.convertFileSrc(dataUri+"/"+l.dir+"/"+name);
+  return `${base}/files/${b.id}/${name}?v=${b.updatedAt||0}${party?"&p="+encodeURIComponent(party):""}`;
+}
+function headers(extra){
+  const h=Object.assign({},extra||{});
+  if(party) h["X-Party-Password"]=party;
+  if(keeperPw) h["X-Keeper-Password"]=keeperPw;
+  return h;
+}
+function timeoutFetch(url,opts,ms){
+  const c=new AbortController(); const t=setTimeout(()=>c.abort(),ms||10000);
+  return fetch(url,Object.assign({},opts,{signal:c.signal})).finally(()=>clearTimeout(t));
+}
+async function api(method,path,body){
+  const opts={method,headers:headers()};
+  if(body!==undefined){ opts.headers["Content-Type"]="application/json"; opts.body=JSON.stringify(body); }
+  const r=await timeoutFetch(base+"/"+path,opts,20000);
+  let data={}; try{ data=await r.json(); }catch(e){}
+  if(r.status===401 && path!=="api/books"){ setKeeper(""); throw new Error("Your keeper login expired. Unlock again in Settings."); }
+  if(!r.ok){ const e=new Error(data.error||("Server error "+r.status)); e.status=r.status; throw e; }
+  return data;
+}
+
+/* ---------- boot ---------- */
+async function boot(){
+  try{ cfg=await fetch("config.json",{cache:"no-store"}).then(r=>r.ok?r.json():{}); }catch(e){ cfg={}; }
+  try{
+    const m=await fetch("srd/meta.json").then(r=>r.ok?r.json():null);
+    if(m) builtin=[{id:"srd",builtin:true,title:m.title,pages:m.pages,updatedAt:m.version||1,size:m.size||0}];
+    $("srdCredit").hidden=!builtin.length;
+  }catch(e){}
+  if(isApp && FS){ try{ dataUri=(await FS.getUri({directory:"DATA",path:""})).uri.replace(/\/$/,""); }catch(e){} }
+  if(isApp){
+    base=ls.get("server","") || (cfg.defaultServer||"");
+    if(APP){
+      APP.addListener("backButton",onBack);
+      APP.addListener("appStateChange",s=>{ if(s.isActive) refresh(); });
+    }
+    if(!base && !offlineOnly) return showConnect();
+    if(base && !ls.get("server","")) return showConnect();
+  }else{
+    base=location.origin+location.pathname.replace(/\/[^/]*$/,"");
+  }
+  showMain(); refresh(); checkAppUpdate(false);
+}
+function showMain(){ $("connectView").hidden=true; $("mainView").hidden=false; }
+function onBack(){
+  if(!$("reader").hidden) return closeReader();
+  if(!$("settings").hidden) return closeSettings();
+  if($("q").value){ $("q").value=""; return runSearch(); }
+  APP.exitApp();
+}
+
+/* ---------- connect screen ---------- */
+function showConnect(msg,partyOnly){
+  $("mainView").hidden=true; $("connectView").hidden=false; closeSettings();
+  $("connectMsg").textContent=msg||"Connect to your party's vault.";
+  $("addrWrap").hidden=!isApp || !!partyOnly;
+  $("cAddr").value=base||cfg.defaultServer||"";
+  $("cParty").value="";
+  $("cSkip").hidden=!(isApp && builtin.length);
+  $("cErr").hidden=true;
+  setTimeout(()=>{ (isApp && !partyOnly && !$("cAddr").value ? $("cAddr") : $("cParty")).focus(); },50);
+}
+function normAddr(a){
+  a=a.trim().replace(/\/+$/,"").replace(/\/index\.html$/,"");
+  if(a && !/^https?:\/\//i.test(a)) a="https://"+a;
+  return a;
+}
+$("connectForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=t=>{ $("cErr").textContent=t; $("cErr").hidden=false; $("cGo").disabled=false; $("cGo").textContent="Connect"; };
+  const addr=isApp?normAddr($("cAddr").value):base, pw=$("cParty").value;
+  if(isApp && !addr) return err("Enter your vault's address. Your DM can give it to you.");
+  $("cGo").disabled=true; $("cGo").textContent="Connecting…"; $("cErr").hidden=true;
+  let info;
+  try{ info=await timeoutFetch(addr+"/api/info",{},12000).then(r=>r.json()); }
+  catch(e){ return err("Couldn't reach that address. Check it's typed right and the vault is running."); }
+  if(!info || info.name!=="Tome Vault") return err("That address isn't a Tome Vault.");
+  if(info.partyRequired){
+    if(!pw) return err("This vault needs the party password.");
+    const r=await timeoutFetch(addr+"/api/books",{headers:{"X-Party-Password":pw}},12000).catch(()=>null);
+    if(!r) return err("Couldn't reach the vault. Try again.");
+    if(r.status===401) return err("That party password isn't right.");
+  }
+  $("cGo").disabled=false; $("cGo").textContent="Connect";
+  if(isApp && addr!==ls.get("server","")){ remote=[]; ls.set("books",[]); }
+  base=addr; party=info.partyRequired?pw:""; offlineOnly=false;
+  if(isApp) ls.set("server",base);
+  ls.set("party",party); ls.set("offlineOnly",false);
+  showMain(); refresh(); checkAppUpdate(false);
+});
+$("cSkip").onclick=()=>{ offlineOnly=true; ls.set("offlineOnly",true); showMain(); refresh(); };
+
+/* ---------- loading the library ---------- */
+let refreshing=null;
+function refresh(){ if(!refreshing) refreshing=doRefresh().finally(()=>{ refreshing=null; }); return refreshing; }
+async function doRefresh(){
+  if(isApp && (offlineOnly || !base)){
+    online=false; remote=[]; mergeBooks(); setSub(builtin.length?"Built-in rules only. Connect a vault in Settings.":"Connect a vault in Settings.",true); return;
+  }
+  try{
+    const r=await timeoutFetch(base+"/api/books",{headers:headers(),cache:"no-store"},12000);
+    if(r.status===401){ online=false; party=""; ls.set("party",""); return showConnect("The party password changed. Enter the new one.",true); }
+    if(!r.ok) throw new Error("bad status");
+    remote=await r.json(); online=true;
+    ls.set("books",remote);
+  }catch(e){
+    online=false; remote=ls.get("books",[]);
+  }
+  mergeBooks();
+  if(online && offlineOn()) sync();
+  else statusLine();
+}
+function mergeBooks(){
+  const list = online ? remote : remote.filter(b=>isApp && localIdx[b.id]);
+  const old=JSON.stringify(books.map(b=>[b.id,b.title,b.updatedAt,isLocal(b)]));
+  books=[...builtin,...list.slice().sort((a,b)=>String(a.title).localeCompare(String(b.title)))];
+  const now=JSON.stringify(books.map(b=>[b.id,b.title,b.updatedAt,isLocal(b)]));
+  if(old!==now || !$("grid").childElementCount){ renderLibrary(); refreshFilter(); if($("q").value.trim().length>=2) runSearch(); }
+  statusLine();
+}
+function setSub(t,warn){ $("sub").textContent=t; $("sub").classList.toggle("offline",!!warn); }
+function statusLine(){
+  if(sync.active) return;
+  const n=books.length, pages=books.reduce((s,b)=>s+(b.pages||0),0);
+  const count=`${n} ${n===1?"book":"books"} · ${pages.toLocaleString()} pages`;
+  if(isApp && (offlineOnly||!base)) return;
+  if(!online) return setSub(isApp ? `Offline · ${count} on this phone` : "Can't reach the vault. Is the server running?", true);
+  setSub(n ? count : "The shelf is empty", false);
+}
+
+/* ---------- offline sync (app) ---------- */
+async function sync(){
+  if(sync.active || !FS || !online) return;
+  sync.active=true;
+  try{
+    const ids=new Set(remote.map(b=>b.id));
+    for(const id of Object.keys(localIdx)){ if(!ids.has(id)) await dropLocal(id); }
+    const todo=remote.filter(b=>!isLocal(b));
+    for(let i=0;i<todo.length;i++){
+      const b=todo[i];
+      const label=p=>setSub(`Downloading ${i+1} of ${todo.length}: ${b.title}${p!=null?" · "+p+"%":""}`,false);
+      label(null);
+      const dir=`books/${b.id}-${b.updatedAt}`;
+      let handle=null;
+      try{
+        for(const name of ["cover.jpg","text.json","book.pdf"]){
+          const url=`${base}/files/${b.id}/${name}?v=${b.updatedAt}`;
+          if(name==="book.pdf"){
+            handle=await FS.addListener("progress",p=>{ if(p.url===url && p.contentLength>0){ label(Math.round(p.bytes/p.contentLength*100)); markTile(b.id,Math.round(p.bytes/p.contentLength*100)); } });
+          }
+          await FS.downloadFile({url,path:dir+"/"+name,directory:"DATA",recursive:true,progress:name==="book.pdf",headers:headers()});
+        }
+        const prev=localIdx[b.id];
+        localIdx[b.id]={updatedAt:b.updatedAt,dir,size:b.size||0};
+        ls.set("local",localIdx);
+        if(prev && prev.dir!==dir) FS.rmdir({path:prev.dir,directory:"DATA",recursive:true}).catch(()=>{});
+        docCache.delete(b.id); textCache.delete(b.id);
+        markTile(b.id,"done");
+      }catch(e){
+        FS.rmdir({path:dir,directory:"DATA",recursive:true}).catch(()=>{});
+        if(handle) handle.remove();
+        sync.active=false; setSub("Downloads paused. They'll pick up next time you open the app.",true);
+        return;
+      }finally{ if(handle) try{ handle.remove(); }catch(_){} }
+    }
+  }finally{ sync.active=false; }
+  statusLine();
+}
+async function dropLocal(id){
+  const l=localIdx[id]; delete localIdx[id]; ls.set("local",localIdx);
+  docCache.delete(id); textCache.delete(id);
+  if(l && FS) await FS.rmdir({path:l.dir,directory:"DATA",recursive:true}).catch(()=>{});
+}
+function markTile(id,p){
+  const m=document.querySelector(`.tile[data-id="${id}"] .state`); if(!m) return;
+  if(p==="done"){ m.className="state local"; m.textContent="· On this phone"; }
+  else { m.className="state dl"; m.textContent=`· Downloading ${p}%`; }
+}
+
+/* ---------- library ---------- */
+function renderLibrary(){
+  $("libLabel").hidden=!books.length;
+  const g=$("grid"); g.innerHTML="";
+  books.forEach(b=>g.appendChild(tile(b)));
+  if(keeper() && remote.length){
+    const d=document.createElement("div"); d.className="tile";
+    d.innerHTML=`<button class="drop" type="button"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add a PDF</button>`;
+    d.firstChild.onclick=()=>$("fileIn").click(); g.appendChild(d);
+  }
+  const box=$("emptyBox");
+  if(remote.length || (books.length && !online)){ box.innerHTML=""; return; }
+  if(isApp && (offlineOnly||!base)){ box.innerHTML=""; return; }
+  if(!online){ box.innerHTML=builtin.length?"":`<div class="empty"><h2>Can't reach the vault</h2><p>Check your connection, then tap the refresh button.</p></div>`; return; }
+  box.innerHTML = keeper()
+    ? `<div class="empty"><h2>Stock your shelf</h2><p>Add your PDFs. Each book's first page becomes its cover, and every page becomes searchable.</p><button class="btn primary" type="button" id="emptyAdd">Add books</button></div>`
+    : `<div class="empty"><h2>No books in the vault yet</h2><p>Your DM can add books with the keeper password in Settings.</p></div>`;
+  const b=$("emptyAdd"); if(b) b.onclick=()=>$("fileIn").click();
+}
+function tile(b){
+  const t=document.createElement("div"); t.className="tile"; t.dataset.id=b.id;
+  let state="";
+  if(b.builtin) state=`<span class="state local">· Built in</span>`;
+  else if(offlineOn()) state = isLocal(b) ? `<span class="state local">· On this phone</span>` : `<span class="state dl">· Waiting to download</span>`;
+  t.innerHTML=`<button class="cover" type="button" aria-label="Open ${esc(b.title)}"><span class="ph">${esc(b.title)}</span><img alt="" loading="lazy" src="${esc(urlFor(b,"cover.jpg"))}">${b.builtin?'<span class="badge">Free rules</span>':""}</button>
+    <p class="tname">${esc(b.title)}</p><div class="tmeta"><span>${(b.pages||0).toLocaleString()} pages</span>${state}</div>`;
+  const img=t.querySelector("img"); img.onerror=()=>img.remove();
+  t.querySelector(".cover").onclick=()=>openBook(b.id,1,"");
+  if(keeper() && !b.builtin){
+    const m=document.createElement("button"); m.className="more"; m.type="button"; m.setAttribute("aria-label","Options for "+b.title);
+    m.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
+    m.onclick=e=>{ e.stopPropagation(); toggleMenu(t,b); };
+    t.appendChild(m);
+  }
+  return t;
+}
+function closeMenus(){ document.querySelectorAll(".menu").forEach(m=>m.remove()); }
+document.addEventListener("click",e=>{ if(!e.target.closest(".menu")) closeMenus(); });
+function toggleMenu(t,b){
+  const had=t.querySelector(".menu"); closeMenus(); if(had) return;
+  const m=document.createElement("div"); m.className="menu";
+  m.innerHTML=`<button type="button" data-a="rename">Rename</button><button type="button" class="warn" data-a="del">Remove book</button>`;
+  m.onclick=async e=>{
+    e.stopPropagation(); const a=e.target.dataset.a;
+    if(a==="rename"){ m.remove(); startRename(t,b); }
+    if(a==="del") m.innerHTML=`<p>Remove this book from the vault for everyone?</p><button type="button" class="warn" data-a="yes">Remove</button><button type="button" data-a="no">Keep it</button>`;
+    if(a==="no") m.remove();
+    if(a==="yes"){ m.innerHTML=`<p>Removing…</p>`; try{ await api("DELETE","api/books/"+b.id); await dropLocal(b.id); }catch(err){ m.innerHTML=`<p>${esc(err.message)}</p>`; return; } refresh(); }
+  };
+  t.appendChild(m);
+}
+function startRename(t,b){
+  const name=t.querySelector(".tname"), inp=document.createElement("input");
+  inp.className="rename"; inp.id="rename-"+b.id; inp.value=b.title; name.replaceWith(inp); inp.focus(); inp.select();
+  let done=false;
+  const finish=async save=>{
+    if(done) return; done=true; const v=inp.value.trim();
+    if(save && v && v!==b.title){ try{ await api("PATCH","api/books/"+b.id,{title:v}); }catch(e){} await refresh(); }
+    renderLibrary();
+  };
+  inp.onkeydown=e=>{ if(e.key==="Enter") finish(true); if(e.key==="Escape") finish(false); };
+  inp.onblur=()=>finish(true);
+}
+function refreshFilter(){
+  const s=$("bookFilter"), cur=s.value;
+  s.innerHTML=`<option value="">All books</option>`+books.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}</option>`).join("");
+  s.value=books.some(b=>b.id===cur)?cur:"";
+}
+$("syncBtn").onclick=async()=>{ $("syncBtn").disabled=true; setSub("Checking the vault…",false); await refresh(); $("syncBtn").disabled=false; };
+let pollT=setInterval(()=>{ if(document.visibilityState==="visible" && $("reader").hidden && !sync.active) refresh(); },60000);
+
+/* ---------- settings ---------- */
+$("setBtn").onclick=openSettings;
+$("setClose").onclick=closeSettings;
+$("settings").addEventListener("click",e=>{ if(e.target.id==="settings") closeSettings(); });
+function openSettings(){
+  $("settings").hidden=false;
+  $("secVault").hidden=!isApp;
+  $("vaultLine").textContent = offlineOnly||!base ? "Not connected. Using the built-in rules only." : `${base}${online?"":" (can't reach it right now)"}`;
+  $("secOffline").hidden=!isApp;
+  $("offlineToggle").checked=offlineOn();
+  const used=Object.values(localIdx).reduce((s,l)=>s+(l.size||0),0), n=Object.keys(localIdx).length;
+  $("offlineLine").textContent = n ? `${n} ${n===1?"book":"books"} saved here, using about ${fmtBytes(used)}. New books download automatically when you open the app.` : "No books saved on this phone yet.";
+  $("clearLocal").hidden=!n;
+  $("secKeeper").hidden = !online;
+  $("keeperForm").hidden=!!keeperPw; $("kLock").hidden=!keeperPw; $("kErr").hidden=true;
+  $("keeperLine").textContent = keeperPw ? "Keeper tools are unlocked on this device. Tap ⋯ on a cover to rename or remove it." : "Enter the keeper password to add, rename, or remove books.";
+  $("secApp").hidden=!isApp;
+  $("appLine").textContent=`Version ${cfg.version||"dev"}`;
+}
+function closeSettings(){ $("settings").hidden=true; }
+$("changeVault").onclick=()=>showConnect("Enter the new vault's address.");
+$("offlineToggle").onchange=e=>{ ls.set("offline",e.target.checked); if(e.target.checked) refresh(); else renderLibrary(); openSettings(); };
+$("clearLocal").onclick=async()=>{
+  if($("clearLocal").dataset.confirm!=="1"){ $("clearLocal").dataset.confirm="1"; $("clearLocal").textContent="Tap again to remove them"; return; }
+  $("clearLocal").dataset.confirm=""; $("clearLocal").textContent="Remove downloaded books";
+  ls.set("offline",false);
+  for(const id of Object.keys(localIdx)) await dropLocal(id);
+  mergeBooks(); renderLibrary(); openSettings();
+};
+function setKeeper(k){ keeperPw=k; ls.set("keeper",k||null); renderLibrary(); if(!$("settings").hidden) openSettings(); }
+$("keeperForm").addEventListener("submit",async e=>{
+  e.preventDefault(); const pw=$("kPw").value;
+  const fail=t=>{ $("kErr").textContent=t; $("kErr").hidden=false; };
+  if(!pw) return fail("Enter the keeper password.");
+  const r=await timeoutFetch(base+"/api/check",{headers:{"X-Keeper-Password":pw}},10000).catch(()=>null);
+  if(r && r.ok){ $("kPw").value=""; setKeeper(pw); }
+  else fail(r ? "That keeper password isn't right." : "Can't reach the vault.");
+});
+$("kPw").addEventListener("input",()=>{ $("kErr").hidden=true; });
+$("kLock").onclick=()=>setKeeper("");
+
+/* ---------- app updates (Android) ---------- */
+function verNum(v){ return String(v||"").replace(/^v/,"").split(".").map(n=>parseInt(n,10)||0).reduce((a,n)=>a*1000+n,0); }
+async function checkAppUpdate(manual){
+  if(!isApp || !cfg.repo){ if(manual) $("appLine").textContent=`Version ${cfg.version||"dev"} · update checks aren't set up for this build.`; return; }
+  const last=ls.get("updCheck",0);
+  if(!manual && Date.now()-last<6*3600e3 && !ls.get("updAvail",null)) return;
+  try{
+    const rel=await timeoutFetch(`https://api.github.com/repos/${cfg.repo}/releases/latest`,{headers:{Accept:"application/vnd.github+json"}},10000).then(r=>r.ok?r.json():null);
+    ls.set("updCheck",Date.now());
+    if(!rel) throw 0;
+    const apk=(rel.assets||[]).find(a=>/\.apk$/i.test(a.name));
+    if(verNum(rel.tag_name)>verNum(cfg.version)){
+      ls.set("updAvail",rel.tag_name);
+      $("updateText").textContent=`Tome Vault ${rel.tag_name.replace(/^v/,"")} is ready. Install it over this one; your books stay put.`;
+      $("updateLink").href=apk?apk.browser_download_url:rel.html_url;
+      $("updateBanner").hidden=false;
+      if(manual) $("appLine").textContent=`Version ${cfg.version} · an update is ready (see the top of the shelf).`;
+    }else{
+      ls.set("updAvail",null); $("updateBanner").hidden=true;
+      if(manual) $("appLine").textContent=`Version ${cfg.version} · you're up to date.`;
+    }
+  }catch(e){ if(manual) $("appLine").textContent=`Version ${cfg.version||"dev"} · couldn't check for updates right now.`; }
+}
+$("checkApp").onclick=()=>{ $("appLine").textContent="Checking…"; checkAppUpdate(true); };
+
+/* ---------- uploads (keeper) ---------- */
+$("fileIn").onchange=e=>{ queue([...e.target.files]); e.target.value=""; };
+document.addEventListener("dragover",e=>{ if(keeper()) e.preventDefault(); });
+document.addEventListener("drop",e=>{ if(!keeper()) return; e.preventDefault(); queue([...e.dataTransfer.files]); });
+let busy=Promise.resolve();
+function queue(files){
+  files.filter(f=>/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)).forEach(f=>{ const job=makeJob(f.name); busy=busy.then(()=>addBook(f,job)); });
+}
+function makeJob(name){
+  const el=document.createElement("div"); el.className="job";
+  el.innerHTML=`<span class="spin" aria-hidden="true"></span><span class="name"></span><span class="st" role="status">Waiting</span>`;
+  el.querySelector(".name").textContent=name; $("jobs").appendChild(el);
+  const st=el.querySelector(".st");
+  return {
+    set:t=>{ st.textContent=t; },
+    done:()=>{ el.classList.add("ok"); el.querySelector(".spin").remove(); st.textContent="On the shelf"; setTimeout(()=>el.remove(),5000); },
+    fail:t=>{ el.classList.add("err"); el.querySelector(".spin").remove(); st.textContent=t;
+      const x=document.createElement("button"); x.className="btn icon"; x.type="button"; x.setAttribute("aria-label","Dismiss"); x.textContent="×"; x.onclick=()=>el.remove(); el.appendChild(x); }
+  };
+}
+function putFile(id,kind,blob,onProgress){
+  return new Promise((res,rej)=>{
+    const x=new XMLHttpRequest(); x.open("PUT",`${base}/api/books/${id}/${kind}`);
+    x.setRequestHeader("X-Keeper-Password",keeperPw);
+    x.setRequestHeader("Content-Type","application/octet-stream");
+    if(onProgress) x.upload.onprogress=e=>{ if(e.lengthComputable) onProgress(e.loaded/e.total); };
+    x.onload=()=> x.status>=200&&x.status<300 ? res() : rej(new Error(x.status===401?"Wrong keeper password.":x.status===413?"That file is too large.":"Upload failed ("+x.status+")."));
+    x.onerror=()=>rej(new Error("Lost connection to the vault during upload."));
+    x.send(blob);
+  });
+}
+function cleanTitle(n){ return n.replace(/\.pdf$/i,"").replace(/[_]+/g," ").replace(/\s+/g," ").trim(); }
+function joinText(items){
+  let s=""; for(const it of items){ if(typeof it.str!=="string") continue; s+=it.str; s+=it.hasEOL?"\n":" "; }
+  return s.replace(/(\w)-\s*\n\s*(\w)/g,"$1$2").replace(/[ \t ]+/g," ").replace(/\s*\n\s*/g,"\n").trim();
+}
+async function renderCover(pdf){
+  const page=await pdf.getPage(1), v1=page.getViewport({scale:1}), vp=page.getViewport({scale:520/v1.width});
+  const c=document.createElement("canvas"); c.width=Math.round(vp.width); c.height=Math.round(vp.height);
+  const ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,c.width,c.height);
+  await page.render({canvasContext:ctx,viewport:vp}).promise; page.cleanup();
+  return new Promise(r=>c.toBlob(r,"image/jpeg",0.85));
+}
+async function addBook(file,job){
+  let pdf=null, id=null;
+  try{
+    job.set("Reading the PDF");
+    pdf=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+    const n=pdf.numPages; let title=cleanTitle(file.name);
+    try{ const t=(await pdf.getMetadata()).info.Title; if(t && t.trim().length>3 && !/untitled|^microsoft|\.(indd|docx?)$/i.test(t.trim())) title=t.trim(); }catch(e){}
+    job.set("Making the cover");
+    const cover=await renderCover(pdf);
+    const pages=[];
+    for(let i=1;i<=n;i++){
+      if(i===1||i%10===0||i===n) job.set(`Reading text, page ${i} of ${n}`);
+      const p=await pdf.getPage(i); pages.push(joinText((await p.getTextContent()).items)); p.cleanup();
+    }
+    await pdf.destroy(); pdf=null;
+    id=(await api("POST","api/books",{title,pages:n,size:file.size})).id;
+    job.set("Saving the cover"); await putFile(id,"cover",cover);
+    job.set("Saving the search index"); await putFile(id,"text",new Blob([JSON.stringify(pages)],{type:"application/json"}));
+    await putFile(id,"pdf",file,f=>job.set(`Uploading ${fmtBytes(file.size)}: ${Math.round(f*100)}%`));
+    job.done(); refresh();
+  }catch(e){
+    if(pdf) try{ pdf.destroy(); }catch(_){}
+    if(id) try{ await api("DELETE","api/books/"+id); }catch(_){}
+    job.fail(e && e.name==="PasswordException" ? "This PDF is password protected." : e && e.name==="InvalidPDFException" ? "This file isn't a readable PDF." : (e && e.message) || "Something went wrong.");
+  }
+}
+
+/* ---------- search ---------- */
+function ensureText(b){
+  const key=b.id+":"+(isLocal(b)?"l":"r")+b.updatedAt;
+  if(textCache.has(b.id) && textCache.get(b.id).key===key) return textCache.get(b.id).p;
+  const p=fetch(urlFor(b,"text.json"),{headers:b.builtin||isLocal(b)?{}:headers()}).then(r=>{ if(!r.ok) throw new Error("index missing"); return r.json(); });
+  textCache.set(b.id,{key,p}); p.catch(()=>textCache.delete(b.id)); return p;
+}
+const terms = q => q.toLowerCase().split(/\s+/).filter(Boolean);
+function pageHits(pages,q){
+  const ts=terms(q), phrase=q.toLowerCase().trim(), out=[];
+  pages.forEach((txt,i)=>{
+    const low=txt.toLowerCase(); if(!ts.every(t=>low.includes(t))) return;
+    const ph=low.indexOf(phrase); out.push({page:i+1,at:ph>=0?ph:low.indexOf(ts[0]),exact:ph>=0});
+  });
+  return out;
+}
+function snippet(txt,at,q){
+  const s=Math.max(0,at-90), e=Math.min(txt.length,at+170);
+  let h=esc((s>0?"…":"")+txt.slice(s,e).replace(/\s+/g," ")+(e<txt.length?"…":""));
+  const ts=terms(q).sort((a,b)=>b.length-a.length).map(t=>esc(t).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+  if(ts.length) h=h.replace(new RegExp("("+ts.join("|")+")","gi"),"<mark>$1</mark>");
+  return h;
+}
+let sTimer=0, sToken=0;
+$("q").addEventListener("input",()=>{ clearTimeout(sTimer); sTimer=setTimeout(runSearch,250); });
+$("bookFilter").addEventListener("change",runSearch);
+async function runSearch(){
+  const q=$("q").value.trim(), tok=++sToken;
+  if(q.length<2){ $("resView").hidden=true; $("libView").hidden=false; return; }
+  $("libView").hidden=true; $("resView").hidden=false; $("resLabel").textContent="Searching…";
+  const pick=$("bookFilter").value, groups=[]; let count=0, missing=0;
+  for(const b of books.filter(b=>!pick||b.id===pick)){
+    let pages; try{ pages=await ensureText(b); }catch(e){ missing++; continue; }
+    if(tok!==sToken) return;
+    const hits=pageHits(pages,q).sort((a,b)=>(b.exact-a.exact)||(a.page-b.page));
+    if(hits.length){ groups.push({b,pages,hits}); count+=hits.length; }
+  }
+  if(tok!==sToken) return;
+  $("resLabel").textContent = count ? `${count.toLocaleString()} ${count===1?"page":"pages"} in ${groups.length} ${groups.length===1?"book":"books"}` : "No matches";
+  const box=$("results"); box.innerHTML="";
+  if(!count){ box.innerHTML=`<div class="note">Nothing found for “${esc(q)}”. Try fewer words or a different spelling.${missing?" Some books couldn't be searched right now.":""}</div>`; return; }
+  for(const g of groups){
+    const sec=document.createElement("div"); sec.className="rgroup";
+    sec.innerHTML=`<h3><img alt="" src="${esc(urlFor(g.b,"cover.jpg"))}">${esc(g.b.title)} <span class="muted" style="font-weight:400;font-size:14px">${g.hits.length}</span></h3>`;
+    g.hits.slice(0,25).forEach(h=>{
+      const btn=document.createElement("button"); btn.type="button"; btn.className="hit";
+      btn.innerHTML=`<span class="pg">PAGE ${h.page}</span><span class="sn">${snippet(g.pages[h.page-1],h.at,q)}</span>`;
+      btn.onclick=()=>openBook(g.b.id,h.page,q); sec.appendChild(btn);
+    });
+    if(g.hits.length>25){
+      const more=document.createElement("button"); more.type="button"; more.className="btn"; more.style.marginTop="8px";
+      more.textContent=`Open the book to see all ${g.hits.length} matches`; more.onclick=()=>openBook(g.b.id,g.hits[0].page,q); sec.appendChild(more);
+    }
+    box.appendChild(sec);
+  }
+}
+
+/* ---------- reader ---------- */
+const R={book:null,page:1,zoom:1,query:"",hits:[]};
+let task=null, rToken=0;
+function openBook(id,page,q){
+  const b=books.find(x=>x.id===id); if(!b) return;
+  Object.assign(R,{book:b,page:page||1,zoom:1,query:q||"",hits:[]});
+  $("rTitle").textContent=b.title; $("rTotal").textContent="of "+b.pages; $("rFind").value=R.query; $("rFindInfo").textContent="";
+  $("pagebox").innerHTML=""; $("reader").hidden=false; document.body.style.overflow="hidden";
+  if(R.query) findInBook(true);
+  renderPage();
+}
+function closeReader(){ $("reader").hidden=true; document.body.style.overflow=""; if(task) try{task.cancel();}catch(e){} rToken++; }
+$("rBack").onclick=closeReader;
+function getDoc(b){
+  const src=urlFor(b,"book.pdf");
+  const c=docCache.get(b.id);
+  if(c && c.src===src) return c.p;
+  const p=pdfjsLib.getDocument({url:src,disableAutoFetch:true}).promise;
+  docCache.set(b.id,{src,p}); p.catch(()=>docCache.delete(b.id));
+  return p;
+}
+async function renderPage(){
+  const b=R.book, n=R.page, tok=++rToken, box=$("pagebox"), stage=$("stage");
+  $("rPage").value=n;
+  if(!box.querySelector("canvas")) box.innerHTML=`<div class="rmsg"><span class="spin"></span> Turning the page…</div>`;
+  try{
+    const doc=await getDoc(b); if(tok!==rToken) return;
+    const page=await doc.getPage(n); if(tok!==rToken) return;
+    const v1=page.getViewport({scale:1}), avail=Math.min(stage.clientWidth-20,960);
+    const vp=page.getViewport({scale:Math.max(0.2,avail/v1.width*R.zoom)});
+    const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    const c=document.createElement("canvas"); c.width=Math.floor(vp.width*dpr); c.height=Math.floor(vp.height*dpr);
+    c.style.width=Math.floor(vp.width)+"px"; c.style.height=Math.floor(vp.height)+"px";
+    if(task) try{task.cancel();}catch(e){}
+    task=page.render({canvasContext:c.getContext("2d"),viewport:vp,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null});
+    await task.promise; if(tok!==rToken) return;
+    box.innerHTML=""; box.style.width=Math.floor(vp.width)+"px"; box.appendChild(c); stage.scrollTop=0;
+    if(R.query.trim()) drawHighlights(page,vp,box,tok);
+  }catch(e){
+    if(e && e.name==="RenderingCancelledException") return;
+    if(tok===rToken) box.innerHTML=`<div class="rmsg">${online||b.builtin||isLocal(b)?"This page couldn't load. Try again.":"This book isn't on this phone yet. Connect to the internet to read it."}</div>`;
+  }
+}
+async function drawHighlights(page,vp,box,tok){
+  const tc=await page.getTextContent(); if(tok!==rToken) return;
+  const ts=terms(R.query);
+  for(const it of tc.items){
+    if(!it.str) continue; const low=it.str.toLowerCase();
+    const tx=pdfjsLib.Util.transform(vp.transform,it.transform), fh=Math.hypot(tx[2],tx[3]), cw=it.width*vp.scale/it.str.length;
+    for(const t of ts){
+      let i=low.indexOf(t);
+      while(i>=0){
+        const d=document.createElement("div"); d.className="hl";
+        d.style.left=(tx[4]+i*cw)+"px"; d.style.top=(tx[5]-fh)+"px"; d.style.width=(t.length*cw)+"px"; d.style.height=(fh*1.15)+"px";
+        box.appendChild(d); i=low.indexOf(t,i+t.length);
+      }
+    }
+  }
+}
+function go(n){ if(!R.book) return; n=Math.min(R.book.pages,Math.max(1,n)); if(n===R.page) return; R.page=n; syncHit(); renderPage(); }
+$("pPrev").onclick=()=>go(R.page-1); $("pNext").onclick=()=>go(R.page+1);
+$("rPage").addEventListener("change",e=>{ const v=parseInt(e.target.value,10); if(v) go(v); else e.target.value=R.page; });
+$("zIn").onclick=()=>{ R.zoom=Math.min(3,R.zoom*1.25); renderPage(); };
+$("zOut").onclick=()=>{ R.zoom=Math.max(0.5,R.zoom/1.25); renderPage(); };
+document.addEventListener("keydown",e=>{
+  if($("reader").hidden || e.target.tagName==="INPUT") return;
+  if(e.key==="ArrowRight"||e.key==="PageDown") go(R.page+1);
+  if(e.key==="ArrowLeft"||e.key==="PageUp") go(R.page-1);
+  if(e.key==="Escape") closeReader();
+});
+let tx0=null, ty0=null;
+$("stage").addEventListener("touchstart",e=>{ if(e.touches.length===1){ tx0=e.touches[0].clientX; ty0=e.touches[0].clientY; } else tx0=null; },{passive:true});
+$("stage").addEventListener("touchend",e=>{
+  if(tx0===null||R.zoom>1.01) return; const t=e.changedTouches[0], dx=t.clientX-tx0, dy=t.clientY-ty0;
+  if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.5) go(R.page+(dx<0?1:-1)); tx0=null;
+},{passive:true});
+let fTimer=0;
+$("rFind").addEventListener("input",()=>{ clearTimeout(fTimer); fTimer=setTimeout(async()=>{ R.query=$("rFind").value; await findInBook(false); renderPage(); },300); });
+$("rFind").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); stepHit(1); } });
+async function findInBook(keepPage){
+  const q=R.query.trim(), b=R.book;
+  if(q.length<2){ R.hits=[]; $("rFindInfo").textContent=""; return; }
+  $("rFindInfo").textContent="…";
+  let pages; try{ pages=await ensureText(b); }catch(e){ $("rFindInfo").textContent="Can't search right now"; return; }
+  if(R.book!==b || R.query.trim()!==q) return;
+  R.hits=pageHits(pages,q).map(h=>h.page);
+  if(!R.hits.length){ $("rFindInfo").textContent="No matches"; return; }
+  if(!keepPage){ const nx=R.hits.find(p=>p>=R.page); R.page=nx||R.hits[0]; }
+  syncHit();
+}
+function syncHit(){
+  if(!R.hits.length) return;
+  const i=R.hits.indexOf(R.page), before=R.hits.filter(p=>p<R.page).length;
+  $("rFindInfo").textContent = i>=0 ? `${i+1} of ${R.hits.length} pages` : `${R.hits.length} pages · ${before} before`;
+}
+function stepHit(d){
+  if(!R.hits.length) return;
+  go(d>0 ? (R.hits.find(p=>p>R.page)||R.hits[0]) : ([...R.hits].reverse().find(p=>p<R.page)||R.hits[R.hits.length-1]));
+}
+$("fNext").onclick=()=>stepHit(1); $("fPrev").onclick=()=>stepHit(-1);
+let rz=0; window.addEventListener("resize",()=>{ if($("reader").hidden) return; clearTimeout(rz); rz=setTimeout(renderPage,200); });
+
+boot();
+})();
+</script>
+</body>
+</html>
