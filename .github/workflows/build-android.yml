@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -46,13 +46,21 @@ jobs:
           python scripts/prepare_app.py
 
       - name: Sync Capacitor
-        run: cd app && npx cap sync android
+        run: |
+          cd app && npx cap sync android
+          echo "::notice::Java $(java -version 2>&1 | head -1); ANDROID_HOME=$ANDROID_HOME; platforms: $(ls $ANDROID_HOME/platforms 2>/dev/null | tr '\n' ' ')"
 
       - name: Build APK
         run: |
           cd app/android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -PtvVersionCode=${{ github.run_number }} -PtvVersionName=1.0.${{ github.run_number }}
+          set -o pipefail
+          if ! ./gradlew assembleRelease --no-daemon --stacktrace -PtvVersionCode=${{ github.run_number }} -PtvVersionName=1.0.${{ github.run_number }} 2>&1 | tee build.log; then
+            # surface the reason as annotations so it shows on the run page
+            grep -A 15 "What went wrong" build.log | head -30 | while IFS= read -r line; do echo "::error::$line"; done
+            grep -iE "error:|e: " build.log | head -15 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          fi
           cp app/build/outputs/apk/release/app-release.apk ../../TomeVault.apk
 
       - uses: actions/upload-artifact@v4
